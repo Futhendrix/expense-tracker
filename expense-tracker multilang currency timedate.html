@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Multi-Currency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-lang {
+            background: white;
+            color: #374151;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-lang.active {
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            color: white;
+            border-color: #f97316;
+        }
+
+        .btn-lang:hover {
+            border-color: #9ca3af;
+        }
+
+        .icon-container {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-amber {
+            border-left-color: #fbbf24;
+        }
+
+        .card-cyan {
+            border-left-color: #06b6d4;
+        }
+
+        .card-pink {
+            border-left-color: #ec4899;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            ring: 2px;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+
+        .expense-item {
+            background: linear-gradient(to right, #f9fafb, #f3f4f6);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .expense-item:hover {
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .delete-btn {
+            color: #ef4444;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        .category-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .currency-selector {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+            font-weight: 500;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .currency-selector:hover {
+            border-color: #fbbf24;
+        }
+
+        .currency-selector:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: #e5e7eb #f3f4f6;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="app"></div>
+
+    <script>
+        // ============================================
+        // TRANSLATIONS
+        // ============================================
+        const translations = {
+            en: {
+                title: 'Expense Tracker',
+                subtitle: 'Track and analyze your spending',
+                addExpense: 'Add Expense',
+                totalSpent: 'Total Spent',
+                transactions: 'transactions',
+                averageTransaction: 'Average Transaction',
+                perExpense: 'per expense',
+                topCategory: 'Top Category',
+                addNewExpense: 'Add New Expense',
+                description: 'Description',
+                amount: 'Amount',
+                category: 'Category',
+                date: 'Date',
+                submit: 'Add Expense',
+                cancel: 'Cancel',
+                categoryBreakdown: 'Category Breakdown',
+                spendingByCategory: 'Spending by Category',
+                allTransactions: 'All Transactions',
+                noExpenses: 'No expenses recorded for this month',
+                clickToStart: 'Click "Add Expense" to get started',
+                previous: '← Previous',
+                next: 'Next →',
+                deleteConfirm: 'Are you sure you want to delete this expense?',
+                language: 'Language',
+                currency: 'Currency',
+                categories: {
+                    Food: 'Food',
+                    Transport: 'Transport',
+                    Entertainment: 'Entertainment',
+                    Utilities: 'Utilities',
+                    Health: 'Health',
+                    Shopping: 'Shopping',
+                    Other: 'Other'
+                }
+            },
+            de: {
+                title: 'Ausgabentracker',
+                subtitle: 'Verfolge und analysiere deine Ausgaben',
+                addExpense: 'Ausgabe hinzufügen',
+                totalSpent: 'Gesamtausgegeben',
+                transactions: 'Transaktionen',
+                averageTransaction: 'Durchschnittliche Transaktion',
+                perExpense: 'pro Ausgabe',
+                topCategory: 'Top-Kategorie',
+                addNewExpense: 'Neue Ausgabe hinzufügen',
+                description: 'Beschreibung',
+                amount: 'Betrag',
+                category: 'Kategorie',
+                date: 'Datum',
+                submit: 'Ausgabe hinzufügen',
+                cancel: 'Abbrechen',
+                categoryBreakdown: 'Kategorieverteilung',
+                spendingByCategory: 'Ausgaben nach Kategorie',
+                allTransactions: 'Alle Transaktionen',
+                noExpenses: 'Keine Ausgaben in diesem Monat erfasst',
+                clickToStart: 'Klicke auf "Ausgabe hinzufügen" um zu beginnen',
+                previous: '← Zurück',
+                next: 'Weiter →',
+                deleteConfirm: 'Bist du sicher, dass du diese Ausgabe löschen möchtest?',
+                language: 'Sprache',
+                currency: 'Währung',
+                categories: {
+                    Food: 'Lebensmittel',
+                    Transport: 'Transport',
+                    Entertainment: 'Unterhaltung',
+                    Utilities: 'Nebenkosten',
+                    Health: 'Gesundheit',
+                    Shopping: 'Einkaufen',
+                    Other: 'Sonstiges'
+                }
+            },
+            es: {
+                title: 'Rastreador de Gastos',
+                subtitle: 'Monitorea y analiza tus gastos',
+                addExpense: 'Agregar Gasto',
+                totalSpent: 'Gasto Total',
+                transactions: 'transacciones',
+                averageTransaction: 'Transacción Promedio',
+                perExpense: 'por gasto',
+                topCategory: 'Categoría Principal',
+                addNewExpense: 'Agregar Nuevo Gasto',
+                description: 'Descripción',
+                amount: 'Cantidad',
+                category: 'Categoría',
+                date: 'Fecha',
+                submit: 'Agregar Gasto',
+                cancel: 'Cancelar',
+                categoryBreakdown: 'Desglose por Categoría',
+                spendingByCategory: 'Gastos por Categoría',
+                allTransactions: 'Todas las Transacciones',
+                noExpenses: 'No hay gastos registrados este mes',
+                clickToStart: 'Haz clic en "Agregar Gasto" para comenzar',
+                previous: '← Anterior',
+                next: 'Siguiente →',
+                deleteConfirm: '¿Estás seguro de que deseas eliminar este gasto?',
+                language: 'Idioma',
+                currency: 'Moneda',
+                categories: {
+                    Food: 'Comida',
+                    Transport: 'Transporte',
+                    Entertainment: 'Entretenimiento',
+                    Utilities: 'Servicios',
+                    Health: 'Salud',
+                    Shopping: 'Compras',
+                    Other: 'Otro'
+                }
+            },
+            pt: {
+                title: 'Rastreador de Despesas',
+                subtitle: 'Rastreie e analise seus gastos',
+                addExpense: 'Adicionar Despesa',
+                totalSpent: 'Total Gasto',
+                transactions: 'transações',
+                averageTransaction: 'Transação Média',
+                perExpense: 'por despesa',
+                topCategory: 'Categoria Principal',
+                addNewExpense: 'Adicionar Nova Despesa',
+                description: 'Descrição',
+                amount: 'Valor',
+                category: 'Categoria',
+                date: 'Data',
+                submit: 'Adicionar Despesa',
+                cancel: 'Cancelar',
+                categoryBreakdown: 'Distribuição por Categoria',
+                spendingByCategory: 'Gastos por Categoria',
+                allTransactions: 'Todas as Transações',
+                noExpenses: 'Nenhuma despesa registrada este mês',
+                clickToStart: 'Clique em "Adicionar Despesa" para começar',
+                previous: '← Anterior',
+                next: 'Próximo →',
+                deleteConfirm: 'Tem certeza de que deseja excluir esta despesa?',
+                language: 'Idioma',
+                currency: 'Moeda',
+                categories: {
+                    Food: 'Comida',
+                    Transport: 'Transporte',
+                    Entertainment: 'Entretenimento',
+                    Utilities: 'Serviços',
+                    Health: 'Saúde',
+                    Shopping: 'Compras',
+                    Other: 'Outro'
+                }
+            },
+            it: {
+                title: 'Tracker delle Spese',
+                subtitle: 'Traccia e analizza le tue spese',
+                addExpense: 'Aggiungi Spesa',
+                totalSpent: 'Totale Speso',
+                transactions: 'transazioni',
+                averageTransaction: 'Transazione Media',
+                perExpense: 'per spesa',
+                topCategory: 'Categoria Principale',
+                addNewExpense: 'Aggiungi Nuova Spesa',
+                description: 'Descrizione',
+                amount: 'Importo',
+                category: 'Categoria',
+                date: 'Data',
+                submit: 'Aggiungi Spesa',
+                cancel: 'Annulla',
+                categoryBreakdown: 'Ripartizione per Categoria',
+                spendingByCategory: 'Spese per Categoria',
+                allTransactions: 'Tutte le Transazioni',
+                noExpenses: 'Nessuna spesa registrata questo mese',
+                clickToStart: 'Fai clic su "Aggiungi Spesa" per iniziare',
+                previous: '← Precedente',
+                next: 'Successivo →',
+                deleteConfirm: 'Sei sicuro di voler eliminare questa spesa?',
+                language: 'Lingua',
+                currency: 'Valuta',
+                categories: {
+                    Food: 'Cibo',
+                    Transport: 'Trasporto',
+                    Entertainment: 'Intrattenimento',
+                    Utilities: 'Servizi',
+                    Health: 'Salute',
+                    Shopping: 'Acquisti',
+                    Other: 'Altro'
+                }
+            },
+            fr: {
+                title: 'Suivi des Dépenses',
+                subtitle: 'Suivez et analysez vos dépenses',
+                addExpense: 'Ajouter une Dépense',
+                totalSpent: 'Total Dépensé',
+                transactions: 'transactions',
+                averageTransaction: 'Transaction Moyenne',
+                perExpense: 'par dépense',
+                topCategory: 'Catégorie Principale',
+                addNewExpense: 'Ajouter une Nouvelle Dépense',
+                description: 'Description',
+                amount: 'Montant',
+                category: 'Catégorie',
+                date: 'Date',
+                submit: 'Ajouter une Dépense',
+                cancel: 'Annuler',
+                categoryBreakdown: 'Répartition par Catégorie',
+                spendingByCategory: 'Dépenses par Catégorie',
+                allTransactions: 'Toutes les Transactio ns',
+                noExpenses: 'Aucune dépense enregistrée ce mois',
+                clickToStart: 'Cliquez sur "Ajouter une Dépense" pour commencer',
+                previous: '← Précédent',
+                next: 'Suivant →',
+                deleteConfirm: 'Êtes-vous sûr de vouloir supprimer cette dépense?',
+                language: 'Langue',
+                currency: 'Devise',
+                categories: {
+                    Food: 'Nourriture',
+                    Transport: 'Transports',
+                    Entertainment: 'Divertissement',
+                    Utilities: 'Services',
+                    Health: 'Santé',
+                    Shopping: 'Achats',
+                    Other: 'Autre'
+                }
+            }
+        };
+
+        // ============================================
+        // CURRENCIES (20+ major world currencies)
+        // ============================================
+        const currencies = {
+            USD: { symbol: '$', name: 'US Dollar', code: 'USD' },
+            EUR: { symbol: '€', name: 'Euro', code: 'EUR' },
+            GBP: { symbol: '£', name: 'British Pound', code: 'GBP' },
+            JPY: { symbol: '¥', name: 'Japanese Yen', code: 'JPY' },
+            INR: { symbol: '₹', name: 'Indian Rupee', code: 'INR' },
+            CAD: { symbol: 'C$', name: 'Canadian Dollar', code: 'CAD' },
+            AUD: { symbol: 'A$', name: 'Australian Dollar', code: 'AUD' },
+            CHF: { symbol: 'CHF', name: 'Swiss Franc', code: 'CHF' },
+            CNY: { symbol: '¥', name: 'Chinese Yuan', code: 'CNY' },
+            MXN: { symbol: '$', name: 'Mexican Peso', code: 'MXN' },
+            BRL: { symbol: 'R$', name: 'Brazilian Real', code: 'BRL' },
+            ZAR: { symbol: 'R', name: 'South African Rand', code: 'ZAR' },
+            SGD: { symbol: 'S$', name: 'Singapore Dollar', code: 'SGD' },
+            HKD: { symbol: 'HK$', name: 'Hong Kong Dollar', code: 'HKD' },
+            NZD: { symbol: 'NZ$', name: 'New Zealand Dollar', code: 'NZD' },
+            SEK: { symbol: 'kr', name: 'Swedish Krona', code: 'SEK' },
+            NOK: { symbol: 'kr', name: 'Norwegian Krone', code: 'NOK' },
+            DKK: { symbol: 'kr', name: 'Danish Krone', code: 'DKK' },
+            KRW: { symbol: '₩', name: 'South Korean Won', code: 'KRW' },
+            THB: { symbol: '฿', name: 'Thai Baht', code: 'THB' },
+        };
+
+        // ============================================
+        // EXPENSE TRACKER CLASS
+        // ============================================
+        class ExpenseTracker {
+            constructor() {
+                this.expenses = this.loadExpenses();
+                this.currentMonth = new Date();
+                this.showForm = false;
+                this.chartType = 'pie';
+                this.currentLanguage = localStorage.getItem('language') || 'en';
+                this.currentCurrency = localStorage.getItem('currency') || 'USD';
+                this.initializeCategories();
+                this.init();
+            }
+
+            initializeCategories() {
+                this.categories = ['Food', 'Transport', 'Entertainment', 'Utilities', 'Health', 'Shopping', 'Other'];
+                this.categoryColors = {
+                    Food: '#FF6B6B',
+                    Transport: '#4ECDC4',
+                    Entertainment: '#95E1D3',
+                    Utilities: '#FFE66D',
+                    Health: '#A8E6CF',
+                    Shopping: '#FF8B94',
+                    Other: '#B4A7D6',
+                };
+                this.formData = {
+                    description: '',
+                    amount: '',
+                    category: 'Food',
+                    date: this.getTodayDate(),
+                    time: this.getCurrentTime(),
+                };
+            }
+
+            t(key) {
+                const keys = key.split('.');
+                let value = translations[this.currentLanguage];
+                for (let k of keys) {
+                    value = value[k];
+                }
+                return value;
+            }
+
+            setLanguage(lang) {
+                this.currentLanguage = lang;
+                localStorage.setItem('language', lang);
+                this.render();
+            }
+
+            setCurrency(currency) {
+                this.currentCurrency = currency;
+                localStorage.setItem('currency', currency);
+                this.render();
+            }
+
+            getTodayDate() {
+                return new Date().toISOString().split('T')[0];
+            }
+
+            getCurrentTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                return `${hours}:${minutes}`;
+            }
+
+            loadExpenses() {
+                const saved = localStorage.getItem('expenses');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveExpenses() {
+                localStorage.setItem('expenses', JSON.stringify(this.expenses));
+            }
+
+            addExpense() {
+                if (!this.formData.description || !this.formData.amount) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const newExpense = {
+                    id: Date.now(),
+                    description: this.formData.description,
+                    amount: parseFloat(this.formData.amount),
+                    category: this.formData.category,
+                    date: this.formData.date,
+                    time: this.formData.time,
+                    timestamp: new Date().toISOString(),
+                };
+
+                this.expenses.push(newExpense);
+                this.saveExpenses();
+                this.resetForm();
+                this.showForm = false;
+                this.render();
+            }
+
+            deleteExpense(id) {
+                if (confirm(this.t('deleteConfirm'))) {
+                    this.expenses = this.expenses.filter(e => e.id !== id);
+                    this.saveExpenses();
+                    this.render();
+                }
+            }
+
+            resetForm() {
+                this.formData = {
+                    description: '',
+                    amount: '',
+                    category: 'Food',
+                    date: this.getTodayDate(),
+                    time: this.getCurrentTime(),
+                };
+            }
+
+            getMonthExpenses() {
+                return this.expenses.filter(e => {
+                    const expenseDate = new Date(e.date);
+                    return (
+                        expenseDate.getMonth() === this.currentMonth.getMonth() &&
+                        expenseDate.getFullYear() === this.currentMonth.getFullYear()
+                    );
+                });
+            }
+
+            getCategoryBreakdown() {
+                const monthExpenses = this.getMonthExpenses();
+                const breakdown = {};
+                this.categories.forEach(cat => {
+                    breakdown[cat] = monthExpenses
+                        .filter(e => e.category === cat)
+                        .reduce((sum, e) => sum + e.amount, 0);
+                });
+                return breakdown;
+            }
+
+            changeMonth(offset) {
+                this.currentMonth = new Date(this.currentMonth);
+                this.currentMonth.setMonth(this.currentMonth.getMonth() + offset);
+                this.render();
+            }
+
+            getMonthName() {
+                return this.currentMonth.toLocaleDateString(this.currentLanguage === 'en' ? 'en-US' : this.currentLanguage === 'de' ? 'de-DE' : this.currentLanguage === 'es' ? 'es-ES' : this.currentLanguage === 'pt' ? 'pt-BR' : this.currentLanguage === 'it' ? 'it-IT' : 'fr-FR', {
+                    month: 'long',
+                    year: 'numeric',
+                });
+            }
+
+            getCurrencySymbol() {
+                return currencies[this.currentCurrency].symbol;
+            }
+
+            formatCurrency(amount) {
+                return this.getCurrencySymbol() + amount.toFixed(2);
+            }
+
+            renderPieChart(categoryBreakdown) {
+                const monthExpenses = this.getMonthExpenses();
+                const totalSpent = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+                if (totalSpent === 0) {
+                    return `<div class="empty-state"><p>${this.t('noExpenses')}</p></div>`;
+                }
+
+                let svg = '<svg width="200" height="200" viewBox="0 0 200 200" style="margin: 0 auto; display: block;">';
+                
+                let currentAngle = 0;
+                const radius = 80;
+                const centerX = 100;
+                const centerY = 100;
+
+                Object.entries(categoryBreakdown)
+                    .filter(([_, amount]) => amount > 0)
+                    .forEach(([category, amount]) => {
+                        const percentage = amount / totalSpent;
+                        const sliceAngle = percentage * 2 * Math.PI;
+                        const startAngle = currentAngle;
+                        const endAngle = currentAngle + sliceAngle;
+
+                        const x1 = centerX + radius * Math.cos(startAngle - Math.PI / 2);
+                        const y1 = centerY + radius * Math.sin(startAngle - Math.PI / 2);
+                        const x2 = centerX + radius * Math.cos(endAngle - Math.PI / 2);
+                        const y2 = centerY + radius * Math.sin(endAngle - Math.PI / 2);
+
+                        const largeArc = sliceAngle > Math.PI ? 1 : 0;
+                        const pathData = [
+                            `M ${centerX} ${centerY}`,
+                            `L ${x1} ${y1}`,
+                            `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
+                            'Z',
+                        ].join(' ');
+
+                        svg += `<path d="${pathData}" fill="${this.categoryColors[category]}" stroke="white" stroke-width="2" opacity="0.85"/>`;
+                        currentAngle = endAngle;
+                    });
+
+                svg += `<circle cx="${centerX}" cy="${centerY}" r="40" fill="white"/>`;
+                svg += '</svg>';
+
+                const legend = Object.entries(categoryBreakdown)
+                    .filter(([_, amount]) => amount > 0)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([category, amount]) => {
+                        const percentage = ((amount / totalSpent) * 100).toFixed(1);
+                        return `
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="category-dot" style="background-color: ${this.categoryColors[category]};"></div>
+                                    <span style="color: #374151;">${category}</span>
+                                </div>
+                                <span style="font-weight: 600; color: #111827;">${this.formatCurrency(amount)} (${percentage}%)</span>
+                            </div>
+                        `;
+                    })
+                    .join('');
+
+                return svg + '<div style="margin-top: 24px; max-height: 192px; overflow-y: auto;" class="scrollbar-thin">' + legend + '</div>';
+            }
+
+            renderBarChart(categoryBreakdown) {
+                const monthExpenses = this.getMonthExpenses();
+                const totalSpent = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+                if (totalSpent === 0) {
+                    return `<div class="empty-state"><p>${this.t('noExpenses')}</p></div>`;
+                }
+
+                const maxAmount = Math.max(...Object.values(categoryBreakdown), 1);
+                const entries = Object.entries(categoryBreakdown).filter(([_, amount]) => amount > 0);
+
+                let svg = '<svg width="100%" height="250" viewBox="0 0 500 250" style="max-width: 100%; margin: 0 auto; display: block;">';
+
+                for (let val of [0.25, 0.5, 0.75, 1]) {
+                    svg += `<line x1="60" y1="${200 - val * 150}" x2="480" y2="${200 - val * 150}" stroke="#e5e5e5" stroke-width="1"/>`;
+                }
+
+                entries.forEach(([category, amount], idx) => {
+                    const barHeight = (amount / maxAmount) * 150;
+                    const x = 80 + idx * (380 / entries.length);
+                    svg += `
+                        <g>
+                            <rect x="${x}" y="${200 - barHeight}" width="35" height="${barHeight}" fill="${this.categoryColors[category]}" opacity="0.85" rx="4"/>
+                            <text x="${x + 17.5}" y="225" text-anchor="middle" font-size="12" fill="#666">${category.slice(0, 3)}</text>
+                        </g>
+                    `;
+                });
+
+                svg += `<line x1="60" y1="200" x2="480" y2="200" stroke="#333" stroke-width="2"/>`;
+                svg += `<line x1="60" y1="50" x2="60" y2="200" stroke="#333" stroke-width="2"/>`;
+                svg += '</svg>';
+
+                return svg;
+            }
+
+            getSVGIcon(name) {
+                const icons = {
+                    trending: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,
+                    plus: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+                    calendar: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+                    trash: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+                    pie: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><line x1="22" y1="12" x2="12" y2="12"></line></svg>`,
+                    bar: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"></line><path d="M17 5h-4v14h4M7 9h-4v10h4"></path></svg>`,
+                };
+                return icons[name] || '';
+            }
+
+            render() {
+                const monthExpenses = this.getMonthExpenses();
+                const totalSpent = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+                const categoryBreakdown = this.getCategoryBreakdown();
+                const topCategory = Object.entries(categoryBreakdown).sort(([, a], [, b]) => b - a)[0];
+
+                const html = `
+                    <div class="gradient-bg min-h-screen">
+                        <!-- Header -->
+                        <div class="header-sticky shadow-sm">
+                            <div style="max-width: 1280px; margin: 0 auto; padding: 24px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 16px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="icon-container">
+                                            ${this.getSVGIcon('trending')}
+                                        </div>
+                                        <div>
+                                            <h1 style="font-size: 24px; font-weight: 700; color: #111827;">${this.t('title')}</h1>
+                                            <p style="font-size: 14px; color: #4b5563;">${this.t('subtitle')}</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn-primary" onclick="app.toggleForm()">
+                                        ${this.getSVGIcon('plus')}
+                                        ${this.t('addExpense')}
+                                    </button>
+                                </div>
+                                
+                                <!-- Language & Currency Selector -->
+                                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 13px; font-weight: 500; color: #6b7280;">${this.t('language')}:</span>
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                            ${['en', 'de', 'es', 'pt', 'it', 'fr'].map(lang => {
+                                                const langNames = { en: 'EN', de: 'DE', es: 'ES', pt: 'PT', it: 'IT', fr: 'FR' };
+                                                return `<button class="btn-lang ${this.currentLanguage === lang ? 'active' : ''}" onclick="app.setLanguage('${lang}')">${langNames[lang]}</button>`;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 13px; font-weight: 500; color: #6b7280;">${this.t('currency')}:</span>
+                                        <select class="currency-selector" onchange="app.setCurrency(this.value)">
+                                            ${Object.entries(currencies).map(([code, data]) => 
+                                                `<option value="${code}" ${this.currentCurrency === code ? 'selected' : ''}>${code} ${data.symbol}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div style="max-width: 1280px; margin: 0 auto; padding: 24px; padding-top: 32px;">
+                            <!-- Month Navigation -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap;">
+                                <button class="btn-secondary" onclick="app.changeMonth(-1)">${this.t('previous')}</button>
+                                <div style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+                                    ${this.getSVGIcon('calendar')}
+                                    <h2 style="font-size: 20px; font-weight: 700; color: #111827;">${this.getMonthName()}</h2>
+                                </div>
+                                <button class="btn-secondary" onclick="app.changeMonth(1)">${this.t('next')}</button>
+                            </div>
+
+                            <!-- Summary Cards -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                                <div class="summary-card card-amber">
+                                    <p style="color: #4b5563; font-size: 13px; font-weight: 500; margin-bottom: 8px;">${this.t('totalSpent')}</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #111827;">${this.formatCurrency(totalSpent)}</p>
+                                    <p style="color: #6b7280; font-size: 12px; margin-top: 8px;">${monthExpenses.length} ${this.t('transactions')}</p>
+                                </div>
+
+                                <div class="summary-card card-cyan">
+                                    <p style="color: #4b5563; font-size: 13px; font-weight: 500; margin-bottom: 8px;">${this.t('averageTransaction')}</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #111827;">${this.formatCurrency(monthExpenses.length > 0 ? totalSpent / monthExpenses.length : 0)}</p>
+                                    <p style="color: #6b7280; font-size: 12px; margin-top: 8px;">${this.t('perExpense')}</p>
+                                </div>
+
+                                <div class="summary-card card-pink">
+                                    <p style="color: #4b5563; font-size: 13px; font-weight: 500; margin-bottom: 8px;">${this.t('topCategory')}</p>
+                                    <p style="font-size: 32px; font-weight: 700; color: #111827;">${topCategory ? topCategory[0] : 'N/A'}</p>
+                                    <p style="color: #6b7280; font-size: 12px; margin-top: 8px;">${this.formatCurrency(topCategory ? topCategory[1] : 0)}</p>
+                                </div>
+                            </div>
+
+                            <!-- Add Expense Form -->
+                            ${this.showForm ? `
+                                <div class="fade-in" style="background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 32px; margin-bottom: 32px; border: 1px solid #fef3c7;">
+                                    <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 24px;">${this.t('addNewExpense')}</h3>
+                                    <form onsubmit="event.preventDefault(); app.addExpense();">
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">${this.t('description')}</label>
+                                                <input type="text" class="form-control" placeholder="${this.t('description')}" value="${this.formData.description}" onchange="app.updateForm('description', this.value)">
+                                            </div>
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">${this.t('amount')}</label>
+                                                <input type="number" class="form-control" placeholder="0.00" step="0.01" min="0" value="${this.formData.amount}" onchange="app.updateForm('amount', this.value)">
+                                            </div>
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">${this.t('category')}</label>
+                                                <select class="form-control" onchange="app.updateForm('category', this.value)">
+                                                    ${this.categories.map(cat => `<option value="${cat}" ${this.formData.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                                                </select>
+                                            </div>
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">${this.t('date')}</label>
+                                                <input type="date" class="form-control" value="${this.formData.date}" onchange="app.updateForm('date', this.value)">
+                                            </div>
+                                            <div style="margin-bottom: 16px;">
+                                                <label style="display: block; font-weight: 500; color: #374151; margin-bottom: 8px;">Time (HH:MM)</label>
+                                                <input type="time" class="form-control" value="${this.formData.time}" onchange="app.updateForm('time', this.value)">
+                                            </div>
+                                        </div>
+
+                                        <div style="display: flex; gap: 12px; margin-top: 16px;">
+                                            <button type="submit" class="btn-primary" style="flex: 1;">${this.t('submit')}</button>
+                                            <button type="button" class="btn-secondary" style="flex: 1;" onclick="app.toggleForm()">${this.t('cancel')}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            ` : ''}
+
+                            <!-- Charts -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px; margin-bottom: 32px;">
+                                <!-- Pie Chart -->
+                                <div class="fade-in" style="background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 32px;">
+                                    <h3 style="font-size: 18px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                                        ${this.getSVGIcon('pie')}
+                                        ${this.t('categoryBreakdown')}
+                                    </h3>
+                                    ${this.renderPieChart(categoryBreakdown)}
+                                </div>
+
+                                <!-- Bar Chart -->
+                                <div class="fade-in" style="background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 32px;">
+                                    <h3 style="font-size: 18px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                                        ${this.getSVGIcon('bar')}
+                                        ${this.t('spendingByCategory')}
+                                    </h3>
+                                    ${this.renderBarChart(categoryBreakdown)}
+                                </div>
+                            </div>
+
+                            <!-- Transactions List -->
+                            <div class="fade-in" style="background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 32px;">
+                                <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 24px;">${this.t('allTransactions')}</h3>
+
+                                ${monthExpenses.length > 0 ? `
+                                    <div style="max-height: 400px; overflow-y: auto;" class="scrollbar-thin">
+                                        ${monthExpenses
+                                            .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                            .map(expense => `
+                                                <div class="expense-item" title="Added: ${new Date(expense.timestamp).toLocaleString()}">
+                                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                                        <div style="display: flex; align-items: center; gap: 16px; flex: 1;">
+                                                            <div class="category-dot" style="background-color: ${this.categoryColors[expense.category]};"></div>
+                                                            <div style="flex: 1; min-width: 0;">
+                                                                <p style="font-weight: 500; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${expense.description}</p>
+                                                                <p style="font-size: 13px; color: #4b5563; margin-top: 4px;">
+                                                                    ${expense.category} • ${new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${expense.time}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div style="display: flex; align-items: center; gap: 16px;">
+                                                            <p style="font-weight: 700; color: #111827; font-size: 18px;">${this.formatCurrency(expense.amount)}</p>
+                                                            <button class="delete-btn" onclick="app.deleteExpense(${expense.id})" title="${this.t('deleteConfirm')}">
+                                                                ${this.getSVGIcon('trash')}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `)
+                                            .join('')}
+                                    </div>
+                                ` : `
+                                    <div class="empty-state">
+                                        <p style="font-size: 18px; color: #6b7280;">${this.t('noExpenses')}</p>
+                                        <p style="font-size: 14px; color: #9ca3af; margin-top: 8px;">${this.t('clickToStart')}</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('app').innerHTML = html;
+            }
+
+            updateForm(field, value) {
+                this.formData[field] = value;
+            }
+
+            toggleForm() {
+                this.showForm = !this.showForm;
+                this.render();
+            }
+
+            init() {
+                this.render();
+            }
+        }
+
+        // Initialize the app
+        const app = new ExpenseTracker();
+    </script>
+</body>
+</html>
